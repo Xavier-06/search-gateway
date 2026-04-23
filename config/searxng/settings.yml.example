@@ -1,0 +1,71 @@
+# SearXNG 配置示例
+# 复制到 ~/.searxng/settings.yml 并按需修改
+
+use_default_settings: true
+
+general:
+  instance_name: "Search Gateway"
+  privacypolicy_url: false
+  donation_url: false
+  contact_url: false
+  enable_metrics: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "auto"
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: "change-this-to-a-random-string"
+  bind_address: "0.0.0.0"
+  port: 8888
+  limiter: false
+  public_instance: false
+
+ui:
+  static_use_hash: true
+  default_theme: simple
+  results_on_new_tab: false
+  infinite_scroll: true
+
+outgoing:
+  request_timeout: 10.0
+  max_request_timeout: 30.0
+  useragent_suffix: ""
+  pool_connections: 100
+  pool_maxsize: 20
+  enable_http2: true
+
+engines:
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+
+  - name: bing
+    engine: bing
+    shortcut: b
+    disabled: false
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: false
+
+  - name: baidu
+    engine: baidu
+    shortcut: bd
+    disabled: false
+
+  - name: bing news
+    engine: bing_news
+    shortcut: bnews
+    disabled: false
+
+  - name: news
+    engine: news
+    shortcut: news
+    disabled: false
