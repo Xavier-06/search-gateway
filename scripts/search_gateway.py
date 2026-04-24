@@ -67,13 +67,27 @@ def _relevance_ok(row: dict, query: str) -> bool:
     q = (query or "").strip()
     if not q:
         return True
-    keywords = re.findall(r"[\u4e00-\u9fff]{2,}", q)
-    if not keywords:
-        keywords = [w.strip("\"'") for w in q.split() if len(w) > 2][:3]
-    if not keywords:
-        return True
     text = f"{row.get('title', '')} {row.get('content', '')} {row.get('url', '')}".lower()
-    return any(kw.lower() in text for kw in keywords)
+
+    # 中文：滑动窗口提取子词，避免"光通信行业"整词匹配失败
+    chinese_keywords = re.findall(r"[\u4e00-\u9fff]{2,}", q)
+    if chinese_keywords:
+        for kw in chinese_keywords:
+            if kw.lower() in text:
+                return True
+            # 滑动窗口：2-3字子词，增加召回
+            for size in (2, 3):
+                for i in range(len(kw) - size + 1):
+                    sub = kw[i:i + size]
+                    if sub.lower() in text:
+                        return True
+        return False
+
+    # 英文：取每个单词（去引号）
+    words = [w.strip("\"'") for w in q.split() if len(w) > 2]
+    if not words:
+        return True
+    return any(w.lower() in text for w in words[:3])
 
 def _dedupe(rows: list, max_results: int, query: str = "") -> list:
     out, seen = [], set()
@@ -368,7 +382,7 @@ def verify_engines() -> dict:
         from ddgs import DDGS
         ddg_ok = True
     except ImportError:
-        ddg_ok = bool(subprocess.run(["which", DDGS_BIN], capture_output=True).returncode == 0)
+        ddg_ok = bool(shutil.which(DDGS_BIN) is not None)
 
     scrapling_ok = False
     try:

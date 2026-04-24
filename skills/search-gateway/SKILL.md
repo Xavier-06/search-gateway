@@ -83,7 +83,7 @@ python scripts/search_gateway.py --verify
 
 ## 依赖
 
-- `duckduckgo-search`
+- `ddgs`（新版 duckduckgo-search，安装命令：`pip install ddgs`）
 - `scrapling`（可选，用于深度抓取）
 - `yfinance`（可选，用于金融数据）
 - SearXNG Docker 实例
@@ -91,8 +91,8 @@ python scripts/search_gateway.py --verify
 ## 安装
 
 ```bash
-# 1. 安装依赖
-pip install duckduckgo-search scrapling yfinance requests
+# 1. 安装依赖（注意：包名是 ddgs，不是 duckduckgo-search）
+pip install ddgs scrapling yfinance requests
 
 # 2. 关联脚本目录（skill 和 scripts 在同一仓库时）
 # 在仓库根目录执行：

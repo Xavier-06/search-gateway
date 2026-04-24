@@ -15,7 +15,7 @@
 ### Step 1: 安装 Python 依赖
 
 ```bash
-pip install duckduckgo-search scrapling yfinance requests
+pip install ddgs scrapling yfinance requests
 ```
 
 ### Step 2: 安装 SearXNG

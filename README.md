@@ -23,7 +23,7 @@ ln -s scripts skills/search-gateway/scripts
 ### 1. 安装依赖
 
 ```bash
-pip install duckduckgo-search scrapling yfinance requests
+pip install ddgs scrapling yfinance requests
 ```
 
 ### 2. 启动 SearXNG

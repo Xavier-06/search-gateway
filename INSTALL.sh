@@ -24,7 +24,7 @@ if ! command -v pip &> /dev/null; then
 fi
 
 echo "📦 安装 Python 依赖..."
-$PIP install duckduckgo-search scrapling yfinance requests --quiet
+$PIP install ddgs scrapling yfinance requests --quiet
 
 echo "🐳 检查 Docker..."
 if command -v docker &> /dev/null; then
