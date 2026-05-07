@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -57,8 +58,17 @@ except Exception:
     pass
 
 WORKSPACE = Path(__file__).resolve().parent.parent
-CERT_PATH = "/opt/homebrew/etc/openssl@3/cert.pem"
-if os.path.exists(CERT_PATH):
+
+# ── 配置（全部支持环境变量覆盖）──────────────────────────
+CERT_PATH = os.getenv("SSL_CERT_PATH", "")
+if not CERT_PATH:
+    # macOS Homebrew OpenSSL 常见路径，自动探测
+    _candidates = ["/opt/homebrew/etc/openssl@3/cert.pem", "/usr/local/etc/openssl@3/cert.pem"]
+    for _p in _candidates:
+        if os.path.exists(_p):
+            CERT_PATH = _p
+            break
+if CERT_PATH:
     os.environ.setdefault("SSL_CERT_FILE", CERT_PATH)
     os.environ.setdefault("REQUESTS_CA_BUNDLE", CERT_PATH)
     os.environ.setdefault("CURL_CA_BUNDLE", CERT_PATH)
@@ -188,7 +198,7 @@ def _ddg_search(query: str, max_results: int = 10) -> list:
     # CLI fallback（也清代理）
     backup2 = _clear_proxy_env()
     try:
-        if not os.path.exists(DDGS_BIN):
+        if not shutil.which(DDGS_BIN):
             return []
         result = subprocess.run(
             [DDGS_BIN, "text", "-k", query, "-m", str(max_results + 5), "-r", "wt-wt"],
@@ -272,7 +282,7 @@ def _searxng_search(query: str, max_results: int = 10, engines: str = "", timeou
 # ── Layer 3: Google 直接抓取 ──────────────────────────
 
 def google_search(query: str, max_results: int = 10) -> list:
-    """走 7897 代理抓 Google 搜索页。
+    """走代理抓 Google 搜索页。
     
     Google 现在返回 JS 渲染页面，Fetcher 无法解析。
     改用 requests + 代理 + 特殊 User-Agent 请求非 JS 版本。
@@ -453,7 +463,7 @@ def verify_engines() -> dict:
         from ddgs import DDGS
         ddg_ok = True
     except ImportError:
-        ddg_ok = os.path.exists(DDGS_BIN)
+        ddg_ok = bool(shutil.which(DDGS_BIN))
 
     scrapling_ok = False
     try:
@@ -477,15 +487,17 @@ def verify_engines() -> dict:
         pass
 
     proxy_ok = False
+    _proxy_host = PROXY_URL.replace("http://", "").replace("https://", "").rstrip("/")
     try:
-        r = requests.get("http://127.0.0.1:7897", timeout=3)
+        r = requests.get(PROXY_URL, timeout=3)
         proxy_ok = True
     except Exception:
         try:
             import socket
+            _addr, _, _port = _proxy_host.partition(":")
             s = socket.socket()
             s.settimeout(2)
-            s.connect(("127.0.0.1", 7897))
+            s.connect((_addr, int(_port or 7897)))
             s.close()
             proxy_ok = True
         except Exception:
